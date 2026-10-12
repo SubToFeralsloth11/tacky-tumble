@@ -25,7 +25,7 @@ const LEVELS := [
 		"id": "kitchen", "name": "Kitchen Floor",
 		"blurb": "Crumbs, coins and a very confused cat.",
 		"cm_per_unit": 1.0, "start_d": 10.0, "goal_d": 100.0, "time": 240.0, "half": 650.0,
-		"ground": "tiles", "walls": "kitchen", "growth": 0.36,
+		"ground": "tiles", "walls": "kitchen", "growth": 0.48,
 		"sky_top": Color(0.55, 0.74, 0.95), "sky_horizon": Color(1.0, 0.9, 0.8), "fog": 0.0,
 		"music_root": 0,
 		"spawns": [

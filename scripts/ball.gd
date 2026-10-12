@@ -255,6 +255,31 @@ func _tape_material(color: Color) -> StandardMaterial3D:
 	return m
 
 
+## Nearest worthwhile target with a clear straight path (sweeps the ball shape toward it).
+func _pick_reachable_target() -> StaticBody3D:
+	if not target_finder.is_valid():
+		return null
+	var space := get_world_3d().direct_space_state
+	var query := PhysicsShapeQueryParameters3D.new()
+	var probe := SphereShape3D.new()
+	# Sweep the upper part of the ball only: clutter lower than the radius is rolled over, not blocking.
+	probe.radius = radius * 0.6
+	query.shape = probe
+	query.collision_mask = 1 | Props.LAYER_SOLID
+	query.transform = Transform3D(Basis.IDENTITY, global_position + Vector3.UP * radius * 0.45)
+	for attempt in 6:
+		var t: StaticBody3D = target_finder.call(global_position, pick_limit(), _ap_ignored, _ap_clock)
+		if t == null:
+			return null
+		var to := t.global_position - global_position
+		to.y = 0.0
+		query.motion = to.normalized() * maxf(to.length() - radius, 0.0)
+		if query.motion.length_squared() < 0.0001 or space.cast_motion(query)[0] >= 0.999:
+			return t
+		_ap_ignored[t.get_instance_id()] = _ap_clock + 4.0
+	return null
+
+
 # ---------------------------------------------------------------- autopilot (automated playtests)
 
 func _autopilot_input(delta: float) -> Vector2:
@@ -266,12 +291,16 @@ func _autopilot_input(delta: float) -> Vector2:
 	if _ap_retarget <= 0.0 or not is_instance_valid(_ap_target) or not _can_pick(_ap_target):
 		_ap_retarget = 0.4
 		var previous := _ap_target
-		_ap_target = target_finder.call(global_position, pick_limit(), _ap_ignored, _ap_clock) if target_finder.is_valid() else null
+		_ap_target = _pick_reachable_target()
 		if _ap_target != previous:
 			_ap_best_dist = INF
 			_ap_progress = 0.0
 	if _ap_target == null:
-		return _world_to_input(-global_position.normalized())
+		# Nothing reachable in a straight line: roll somewhere new for a moment.
+		_ap_escape = 1.2
+		var a := randf() * TAU
+		_ap_escape_dir = Vector3(cos(a), 0, sin(a))
+		return _world_to_input(_ap_escape_dir)
 	var to := _ap_target.global_position - global_position
 	to.y = 0.0
 	# Give up on targets we stop closing in on (blocked by solid props), then wiggle free.

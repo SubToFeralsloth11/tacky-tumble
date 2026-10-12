@@ -39,11 +39,11 @@ Every level is defined in centimetres. Each one has its own `cm_per_unit`, so ph
 ## Testing
 
 ```bash
-tools/autotest.sh          # every level
-tools/autotest.sh 0 2      # specific levels
+tools/autotest.sh          # every level, 3 runs each
+RUNS=5 tools/autotest.sh 0 # level 0 only, 5 runs
 ```
 
-The autotest plays each level headlessly with an autopilot at a fixed 60 fps, so a full run takes a few seconds. It fails if a level can't be won or if any script error appears. Use it to check balance after changing spawn counts or `growth`.
+The autotest plays each level headlessly at a fixed 60 fps, driven by a greedy autopilot that steers around obstacles. A single run takes a few seconds. The bot can occasionally get stuck, so a level passes when the bot wins a majority of its runs, and any script error fails the test. The win times it prints are a balance signal: the bot currently finishes in about 40–60% of each time limit. Re-run it after changing spawn counts or `growth`.
 
 ## Screenshots
 
