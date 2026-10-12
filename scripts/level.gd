@@ -76,6 +76,10 @@ func _start() -> void:
 
 func _process(delta: float) -> void:
 	_update_camera(delta)
+	if ball.global_position.y < -half * 0.1:
+		# Safety net: should the ball ever leave the world, put it back at the start.
+		ball.global_position = Vector3(0, ball.radius * 1.05, 0)
+		ball.linear_velocity = Vector3.ZERO
 	if _state == State.PLAY:
 		_time_left -= delta
 		_elapsed += delta
@@ -189,6 +193,20 @@ func _on_bumped(strength: float) -> void:
 func _on_dropped(item: StaticBody3D) -> void:
 	Sfx.play("drop")
 	hud.add_feed("Dropped %s!" % item.get_meta("label"), Color(1, 0.5, 0.5))
+	_unrefresh_pickable()
+
+
+## After the ball shrinks, props that no longer fit become solid again instead of pass-through.
+func _unrefresh_pickable() -> void:
+	var limit := ball.pick_limit()
+	while _next_pickable > 0:
+		var item := _sorted[_next_pickable - 1]
+		if is_instance_valid(item):
+			if float(item.get_meta("size")) <= limit:
+				break
+			if item.get_meta("state") == "world":
+				item.collision_layer = Props.LAYER_SOLID
+		_next_pickable -= 1
 
 
 ## Autopilot helper: nearest pickable prop, preferring bigger ones.
@@ -312,6 +330,7 @@ func _build_environment() -> void:
 func _build_ground() -> void:
 	var body := StaticBody3D.new()
 	body.collision_layer = 1
+	body.set_meta("height", 0.0)  # landing on the floor is never a bump
 	var cs := CollisionShape3D.new()
 	var box := BoxShape3D.new()
 	var thick := half * 0.2
@@ -392,6 +411,11 @@ func _checker(a: Color, b: Color) -> ImageTexture:
 
 
 func _build_walls() -> void:
+	# Invisible boundary far taller than any ball can grow, so nothing can climb out of the level.
+	var thick := half * 0.2
+	for side in 4:
+		var c := _side_centre(side, half + thick * 0.5)
+		_solid_box(c + Vector3(0, half * 1.5, 0), _side_size(side, half * 2.0 + thick * 2.0, half * 3.0, thick), "000000", false)
 	match def.walls:
 		"kitchen":
 			var depth := 60.0 * unit
@@ -418,10 +442,8 @@ func _build_walls() -> void:
 			# house wall behind the starting area for a sense of place
 			_visual_box(Vector3(0, 400.0 * unit, half + 600.0 * unit), Vector3(1600.0 * unit, 800.0 * unit, 1000.0 * unit), "e5989b")
 		"city":
-			var h := 9000.0 * unit
 			for side in 4:
 				var c := _side_centre(side, half + 100.0 * unit)
-				_solid_box(c + Vector3(0, h * 0.5, 0), _side_size(side, half * 2.4, h, 200.0 * unit), "000000", false)
 				var count := 14
 				for i in count:
 					var along := (float(i) / (count - 1) - 0.5) * half * 2.2
@@ -485,6 +507,7 @@ func _build_ball() -> void:
 	ball.setup(r, Game.tape_color(), float(def.growth))
 	ball.position = Vector3(0, r * 1.05, 0)
 	ball.items_root = items_root
+	ball.play_half = half
 	ball.target_finder = _find_target
 	add_child(ball)
 	ball.picked.connect(_on_picked)

@@ -160,16 +160,25 @@ func _load() -> void:
 	var cfg := ConfigFile.new()
 	if cfg.load(SAVE_PATH) != OK:
 		return
+	# Save files are user-editable: keep only values of the expected type.
 	for key in ["stars", "best_time", "best_size"]:
 		var v = cfg.get_value("progress", key, {})
 		if v is Dictionary:
-			data[key] = v
-	data.color = int(cfg.get_value("progress", "color", 0))
+			for id in v:
+				if v[id] is int or v[id] is float:
+					data[key][str(id)] = v[id]
+	var c = cfg.get_value("progress", "color", 0)
+	data.color = clampi(int(c), 0, TAPE_COLORS.size() - 1) if (c is int or c is float) else 0
 	var s = cfg.get_value("settings", "values", {})
 	if s is Dictionary:
 		for k in s:
-			if data.settings.has(k):
+			if not data.settings.has(k):
+				continue
+			var current = data.settings[k]
+			if current is bool and s[k] is bool:
 				data.settings[k] = s[k]
+			elif current is float and (s[k] is float or s[k] is int):
+				data.settings[k] = clampf(float(s[k]), 0.0, 2.5)
 
 
 func save() -> void:

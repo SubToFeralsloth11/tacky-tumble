@@ -19,6 +19,7 @@ var cam_yaw := 0.0
 var input_enabled := false
 var autopilot := false
 var items_root: Node3D  ## where dropped props are returned to
+var play_half := INF  ## half-size of the play area; dropped props land inside it
 var target_finder: Callable  ## (from, limit, ignored: Dictionary, now: float) -> StaticBody3D, used by autopilot
 
 var clump: Node3D
@@ -27,7 +28,8 @@ var _shape: SphereShape3D
 var _pickup_query: PhysicsShapeQueryParameters3D
 var _pickup_shape: SphereShape3D
 var _attached: Array[StaticBody3D] = []
-var _prev_speed := 0.0
+var _prev_vel_h := Vector3.ZERO
+var _drop_dir := Vector3.ZERO
 var _bump_cooldown := 0.0
 
 var _ap_target: StaticBody3D
@@ -108,7 +110,7 @@ func _physics_process(delta: float) -> void:
 	if speed > 0.0001:
 		var axis := Vector3.UP.cross(vel_h / speed)
 		clump.basis = (Basis(axis, speed * delta / radius) * clump.basis).orthonormalized()
-	_prev_speed = speed
+	_prev_vel_h = vel_h
 
 	if input_enabled:
 		_pickup_query.transform = Transform3D(Basis.IDENTITY, global_position)
@@ -189,12 +191,14 @@ func _on_body_entered(body: Node) -> void:
 	# Low clutter is just rolled over; only walls and tall props knock things loose.
 	if body.has_meta("height") and float(body.get_meta("height")) < radius:
 		return
-	var strength := _prev_speed / radius
+	var strength := _prev_vel_h.length() / radius
 	if strength < 4.5:
 		return
 	_bump_cooldown = 0.7
 	bumped.emit(strength)
 	if not _attached.is_empty():
+		# Pre-impact velocity: by the deferred drop the ball has already bounced back.
+		_drop_dir = -_prev_vel_h
 		_drop_last.call_deferred()
 
 
@@ -212,11 +216,12 @@ func _detach(item: StaticBody3D) -> void:
 	_apply_radius(0.0)
 	item.set_meta("state", "flying")
 	item.reparent(items_root, true)
-	var away := -Vector3(linear_velocity.x, 0, linear_velocity.z)
+	var away := _drop_dir
 	if away.length_squared() < 0.0001:
 		away = Vector3.FORWARD
 	var land := global_position + away.normalized() * (radius * 2.5 + size)
-	land.y = 0.0
+	var bound := maxf(play_half - size, 0.0)
+	land = Vector3(clampf(land.x, -bound, bound), 0.0, clampf(land.z, -bound, bound))
 	item.rotation = Vector3(0, randf() * TAU, 0)
 	var start := item.global_position
 	var peak := (start + land) * 0.5 + Vector3.UP * (radius * 2.0)
@@ -225,7 +230,7 @@ func _detach(item: StaticBody3D) -> void:
 		item.global_position = start.lerp(peak, t).lerp(peak.lerp(land, t), t), 0.0, 1.0, 0.45)
 	tw.tween_callback(func() -> void:
 		(item.get_node("Shape") as CollisionShape3D).disabled = false
-		item.collision_layer = Props.LAYER_PICKABLE
+		item.collision_layer = Props.LAYER_PICKABLE if size <= pick_limit() else Props.LAYER_SOLID
 		item.set_meta("state", "world"))
 	dropped.emit(item)
 
