@@ -230,8 +230,16 @@ func hide_overlay() -> void:
 	_settings.visible = false
 
 
-func is_overlay_open() -> bool:
-	return _overlay.visible
+## Runs while the tree is paused (process_mode ALWAYS): Esc closes settings, then resumes.
+func _unhandled_input(event: InputEvent) -> void:
+	if not event.is_action_pressed("pause") or not get_tree().paused:
+		return
+	get_viewport().set_input_as_handled()
+	if _settings.visible:
+		_settings.closed.emit()
+		Game.save()
+	else:
+		resume_requested.emit()
 
 
 func _open() -> void:

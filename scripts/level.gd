@@ -98,10 +98,9 @@ func _update_hud() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	# While paused this node gets no input; Hud handles resuming.
 	if event.is_action_pressed("pause"):
-		if get_tree().paused:
-			_resume()
-		elif _state == State.PLAY or _state == State.FREE:
+		if _state == State.PLAY or _state == State.FREE:
 			_pause()
 		get_viewport().set_input_as_handled()
 	elif event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
