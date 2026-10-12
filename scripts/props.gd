@@ -12,6 +12,7 @@ extends RefCounted
 
 const LAYER_SOLID := 2  ## blocks the ball
 const LAYER_PICKABLE := 4  ## detected by the ball's pickup area
+const LAYER_BOUNDARY := 16  ## invisible level edge: blocks the ball but not the camera
 
 static var DEFS := {
 	# ------------------------------------------------------------ kitchen

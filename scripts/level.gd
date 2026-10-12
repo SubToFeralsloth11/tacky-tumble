@@ -415,7 +415,7 @@ func _build_walls() -> void:
 	var thick := half * 0.2
 	for side in 4:
 		var c := _side_centre(side, half + thick * 0.5)
-		_solid_box(c + Vector3(0, half * 1.5, 0), _side_size(side, half * 2.0 + thick * 2.0, half * 3.0, thick), "000000", false)
+		_solid_box(c + Vector3(0, half * 1.5, 0), _side_size(side, half * 2.0 + thick * 2.0, half * 3.0, thick), "000000", false, Props.LAYER_BOUNDARY)
 	match def.walls:
 		"kitchen":
 			var depth := 60.0 * unit
@@ -471,9 +471,9 @@ func _side_size(side: int, along: float, height: float, depth: float) -> Vector3
 	return Vector3(along, height, depth) if side < 2 else Vector3(depth, height, along)
 
 
-func _solid_box(centre: Vector3, size: Vector3, hex: String, show := true) -> void:
+func _solid_box(centre: Vector3, size: Vector3, hex: String, show := true, layer := 1) -> void:
 	var body := StaticBody3D.new()
-	body.collision_layer = 1
+	body.collision_layer = layer
 	var cs := CollisionShape3D.new()
 	var shape := BoxShape3D.new()
 	shape.size = size

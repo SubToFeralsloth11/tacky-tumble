@@ -53,7 +53,7 @@ func setup(start_radius: float, color: Color, growth_rate: float) -> void:
 	max_contacts_reported = 4
 	continuous_cd = true
 	collision_layer = LAYER_BALL
-	collision_mask = 1 | Props.LAYER_SOLID
+	collision_mask = 1 | Props.LAYER_SOLID | Props.LAYER_BOUNDARY
 	var pm := PhysicsMaterial.new()
 	pm.friction = 0.0  # rotation is locked, so the ball slides; the controller provides all traction
 	pm.bounce = 0.2
@@ -265,7 +265,7 @@ func _pick_reachable_target() -> StaticBody3D:
 	# Sweep the upper part of the ball only: clutter lower than the radius is rolled over, not blocking.
 	probe.radius = radius * 0.6
 	query.shape = probe
-	query.collision_mask = 1 | Props.LAYER_SOLID
+	query.collision_mask = 1 | Props.LAYER_SOLID | Props.LAYER_BOUNDARY
 	query.transform = Transform3D(Basis.IDENTITY, global_position + Vector3.UP * radius * 0.45)
 	for attempt in 6:
 		var t: StaticBody3D = target_finder.call(global_position, pick_limit(), _ap_ignored, _ap_clock)
