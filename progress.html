@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="refresh" content="3">
+<title>Tacky Tumble — Build Progress</title>
+<style>
+  :root { --bg:#14121c; --card:#1f1c2b; --fg:#f2eefa; --muted:#9a93b0; --acc:#ff6fae; --ok:#58e0a0; --now:#ffd166; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:-apple-system,Segoe UI,Roboto,sans-serif; background:var(--bg); color:var(--fg); }
+  header { padding:28px 32px 8px; }
+  h1 { margin:0; font-size:30px; }
+  h1 span { color:var(--acc); }
+  .pitch { color:var(--muted); margin:6px 0 0; max-width:820px; line-height:1.45; }
+  .total { padding:16px 32px; }
+  .bar { height:22px; background:#2c2840; border-radius:11px; overflow:hidden; }
+  .bar > div { height:100%; background:linear-gradient(90deg,var(--acc),var(--now)); transition:width .4s; }
+  .pct { font-size:44px; font-weight:800; margin:4px 0 8px; }
+  .now { color:var(--now); font-weight:600; }
+  main { display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:16px; padding:8px 32px 40px; }
+  section { background:var(--card); border-radius:14px; padding:16px 18px; }
+  section h2 { margin:0 0 4px; font-size:17px; display:flex; justify-content:space-between; }
+  section h2 small { color:var(--muted); font-weight:500; }
+  .mini { height:6px; background:#2c2840; border-radius:3px; overflow:hidden; margin:6px 0 10px; }
+  .mini > div { height:100%; background:var(--ok); }
+  ul { list-style:none; margin:0; padding:0; }
+  li { padding:5px 0; display:flex; gap:9px; align-items:flex-start; color:var(--muted); }
+  li::before { content:"☐"; color:var(--muted); }
+  li.done { color:var(--fg); }
+  li.done::before { content:"☑"; color:var(--ok); }
+  li.doing { color:var(--now); }
+  li.doing::before { content:"◐"; color:var(--now); }
+  footer { color:var(--muted); padding:0 32px 30px; font-size:13px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>🎱 <span>Tacky Tumble</span> — build progress</h1>
+  <p class="pitch">A 3D Godot 4 "roll-up" game: you are a sticky ball of tape. Roll over anything smaller than you to stick it on and grow — from crumbs on a kitchen floor, to a backyard, to swallowing a whole downtown. Beat the size goal before the clock runs out to earn stars and unlock new tape colours.</p>
+</header>
+
+<div class="total">
+  <div class="pct" id="pct">0%</div>
+  <div class="bar"><div id="bar" style="width:0%"></div></div>
+  <p>Now working on: <span class="now" id="now">—</span></p>
+</div>
+
+<main>
+  <section><h2>1. Concept &amp; design <small></small></h2><div class="mini"><div></div></div><ul>
+    <li class="done">Pick a sellable concept (Katamari-style roll-up)</li>
+    <li class="done">Design 3 levels, controls, star scoring, unlocks</li>
+    <li class="done">Choose fully procedural art + audio (no asset licences)</li>
+  </ul></section>
+
+  <section><h2>2. Project setup <small></small></h2><div class="mini"><div></div></div><ul>
+    <li class="doing">Git repo + GitHub remote</li>
+    <li>project.godot, autoloads, input map (keyboard + gamepad)</li>
+    <li>App icon</li>
+  </ul></section>
+
+  <section><h2>3. Core gameplay <small></small></h2><div class="mini"><div></div></div><ul>
+    <li>Rolling ball physics</li>
+    <li>Orbit follow camera that zooms out as you grow</li>
+    <li>Procedural prop factory (dozens of objects)</li>
+    <li>Pick-up &amp; growth system</li>
+    <li>Bump-and-drop mechanic on hard hits</li>
+  </ul></section>
+
+  <section><h2>4. Levels <small></small></h2><div class="mini"><div></div></div><ul>
+    <li>Level 1 — Kitchen Floor</li>
+    <li>Level 2 — Backyard</li>
+    <li>Level 3 — Downtown</li>
+    <li>Balance check: every level winnable</li>
+  </ul></section>
+
+  <section><h2>5. User interface <small></small></h2><div class="mini"><div></div></div><ul>
+    <li>Main menu + level select</li>
+    <li>In-game HUD (size, goal, timer, pickup feed)</li>
+    <li>Pause menu + settings</li>
+    <li>Results screen with stars</li>
+  </ul></section>
+
+  <section><h2>6. Audio <small></small></h2><div class="mini"><div></div></div><ul>
+    <li>Procedural sound effects</li>
+    <li>Procedural background music</li>
+  </ul></section>
+
+  <section><h2>7. Meta &amp; polish <small></small></h2><div class="mini"><div></div></div><ul>
+    <li>Save system (stars, best times, settings)</li>
+    <li>Unlockable tape colours</li>
+    <li>Lighting, shadows, sky, particles</li>
+  </ul></section>
+
+  <section><h2>8. QA &amp; ship <small></small></h2><div class="mini"><div></div></div><ul>
+    <li>Autopilot end-to-end playthrough test</li>
+    <li>Screenshot review of every screen</li>
+    <li>Independent code review pass + fixes</li>
+    <li>Export presets + README / store page copy</li>
+  </ul></section>
+</main>
+
+<footer>This page reloads itself every 3 seconds. Last updated by the build agent: <span id="ts">2026-10-12</span></footer>
+
+<script>
+  const all = document.querySelectorAll("li");
+  const done = document.querySelectorAll("li.done").length;
+  const pct = Math.round(done / all.length * 100);
+  document.getElementById("pct").textContent = pct + "% complete (" + done + "/" + all.length + ")";
+  document.getElementById("bar").style.width = pct + "%";
+  const doing = [...document.querySelectorAll("li.doing")].map(l => l.textContent);
+  document.getElementById("now").textContent = doing.length ? doing.join(" · ") : (pct === 100 ? "Finished! 🎉" : "—");
+  document.querySelectorAll("section").forEach(s => {
+    const items = s.querySelectorAll("li"), d = s.querySelectorAll("li.done").length;
+    s.querySelector("h2 small").textContent = d + "/" + items.length;
+    s.querySelector(".mini > div").style.width = (d / items.length * 100) + "%";
+  });
+</script>
+</body>
+</html>
