@@ -165,9 +165,9 @@ func update_status(size_cm: float, goal_cm: float, start_cm: float, time_left: f
 			Sfx.play("tick", 1.0 + (10 - whole) * 0.05)
 
 
-func add_pickup(text: String) -> void:
-	var l := _label(_feed, "+ " + text, 28)
-	l.modulate = Color(1, 0.95, 0.6)
+func add_feed(text: String, color: Color = Color(1, 0.95, 0.6)) -> void:
+	var l := _label(_feed, text, 28)
+	l.modulate = color
 	if _feed.get_child_count() > 6:
 		_feed.get_child(0).queue_free()
 	var tw := l.create_tween()

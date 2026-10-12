@@ -25,7 +25,7 @@ const LEVELS := [
 		"id": "kitchen", "name": "Kitchen Floor",
 		"blurb": "Crumbs, coins and a very confused cat.",
 		"cm_per_unit": 1.0, "start_d": 10.0, "goal_d": 100.0, "time": 240.0, "half": 650.0,
-		"ground": "tiles", "walls": "kitchen", "growth": 0.3,
+		"ground": "tiles", "walls": "kitchen", "growth": 0.36,
 		"sky_top": Color(0.55, 0.74, 0.95), "sky_horizon": Color(1.0, 0.9, 0.8), "fog": 0.0,
 		"music_root": 0,
 		"spawns": [
@@ -91,24 +91,37 @@ func _ready() -> void:
 		if arg.begins_with("--autotest="):
 			autotest = true
 			autotest_level = int(arg.get_slice("=", 1))
+		elif arg.begins_with("--shot="):
+			_shot_path = arg.get_slice("=", 1)
+		elif arg.begins_with("--shot-at="):
+			_shot_at = float(arg.get_slice("=", 1))
 	apply_settings()
 	if autotest:
 		current_level = clampi(autotest_level, 0, LEVELS.size() - 1)
 		get_tree().change_scene_to_file.call_deferred(LEVEL_SCENE)
-	else:
+	elif _shot_path.is_empty():
 		set_process(false)
 
 
 var _autotest_frames := 0
+var _shot_path := ""  ## --shot=<png>: save a screenshot after --shot-at=<seconds> (default 3) and quit
+var _shot_at := 3.0
+var _clock := 0.0
 
 
-## Watchdog: a broken level (e.g. a script error) must not hang automated playtests.
-func _process(_delta: float) -> void:
-	_autotest_frames += 1
-	if _autotest_frames > int((float(LEVELS[current_level].time) + 30.0) * 60.0):
-		print("AUTOTEST watchdog: level never finished")
-		get_tree().quit(2)
-
+## Dev tooling only: autotest watchdog (a broken level must not hang playtests) and screenshots.
+func _process(delta: float) -> void:
+	_clock += delta
+	if not _shot_path.is_empty() and _clock >= _shot_at:
+		get_viewport().get_texture().get_image().save_png(_shot_path)
+		print("SHOT saved %s" % _shot_path)
+		get_tree().quit()
+		return
+	if autotest:
+		_autotest_frames += 1
+		if _autotest_frames > int((float(LEVELS[current_level].time) + 30.0) * 60.0):
+			print("AUTOTEST watchdog: level never finished")
+			get_tree().quit(2)
 
 # ---------------------------------------------------------------- input
 

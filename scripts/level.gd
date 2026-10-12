@@ -169,8 +169,7 @@ func _refresh_pickable() -> void:
 				item.collision_layer = Props.LAYER_PICKABLE
 			var kind: String = item.get_meta("kind")
 			if not _announced.has(kind) and _state != State.INTRO:
-				_announced[kind] = true
-				hud.add_pickup("Sticky enough for: %s" % item.get_meta("label"))
+				hud.add_feed("Now sticky enough for: %s!" % item.get_meta("label"), Color(0.55, 0.95, 1.0))
 			_announced[kind] = true
 		_next_pickable += 1
 
@@ -178,7 +177,7 @@ func _refresh_pickable() -> void:
 func _on_picked(item: StaticBody3D) -> void:
 	var rel := float(item.get_meta("size")) / ball.pick_limit()
 	Sfx.play("pop", lerpf(1.7, 0.8, rel), -4.0)
-	hud.add_pickup(item.get_meta("label"))
+	hud.add_feed("+ %s" % item.get_meta("label"))
 	_burst(ball.global_position + Vector3.UP * ball.radius * 0.5)
 	_refresh_pickable()
 
@@ -190,7 +189,7 @@ func _on_bumped(strength: float) -> void:
 
 func _on_dropped(item: StaticBody3D) -> void:
 	Sfx.play("drop")
-	hud.add_pickup("Dropped %s!" % item.get_meta("label"))
+	hud.add_feed("Dropped %s!" % item.get_meta("label"), Color(1, 0.5, 0.5))
 
 
 ## Autopilot helper: nearest pickable prop, preferring bigger ones.

@@ -132,7 +132,10 @@ func _attach(item: StaticBody3D) -> void:
 	if local.length_squared() < 0.0001:
 		local = Vector3.UP
 	item.reparent.call_deferred(clump, true)
-	var target := local.normalized() * radius * 0.8
+	# Centre the prop just under the surface so it pokes out and the ball looks lumpy.
+	var depth := radius * 0.95
+	item.set_meta("stick_depth", depth)
+	var target := local.normalized() * depth
 	_settle.call_deferred(item, target)
 	_attached.append(item)
 	var old := radius
@@ -171,7 +174,7 @@ func _prune_buried() -> void:
 		if not is_instance_valid(item):
 			continue
 		var half := float(item.get_meta("size")) * 0.5
-		if item.get_parent() == clump and item.position.length() + half < radius * 0.97:
+		if item.get_parent() == clump and float(item.get_meta("stick_depth", 0.0)) + half < radius * 0.97:
 			item.queue_free()
 		else:
 			keep.append(item)

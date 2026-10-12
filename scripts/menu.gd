@@ -68,21 +68,23 @@ func _build_backdrop() -> void:
 	rng.seed = 4
 	var kinds := ["duck", "apple", "die", "mug", "toycar", "can", "cookie", "crayon", "book", "strawberry",
 		"banana", "eraser", "candy", "teddy", "spoon", "sneaker", "marble", "button"]
-	for i in 34:
+	for i in 60:
 		var kind: String = kinds[i % kinds.size()]
-		var p := Props.build(kind, 0.06)
+		var p := Props.build(kind, 1.0)
 		p.collision_layer = 0
 		p.get_node("Shape").disabled = true
 		var dir := Vector3(rng.randf_range(-1, 1), rng.randf_range(-1, 1), rng.randf_range(-1, 1)).normalized()
 		_ball.clump.add_child(p)
 		p.basis = Basis.looking_at(dir, Vector3.UP if absf(dir.y) < 0.95 else Vector3.RIGHT) * Basis(Vector3.RIGHT, -PI * 0.5)
-		p.position = dir * 0.85
+		p.scale = Vector3.ONE * rng.randf_range(0.35, 0.6) / float(p.get_meta("size"))
+		p.position = dir * 0.9
 
 	for i in 26:
 		var kind: String = kinds[rng.randi() % kinds.size()]
 		var p := Props.build(kind, 0.06)
 		var a := rng.randf() * TAU
-		p.position = Vector3(cos(a), 0, sin(a)) * rng.randf_range(2.0, 9.0)
+		# Outside the camera's orbit (radius 5) so nothing blocks the view of the ball.
+		p.position = Vector3(cos(a), 0, sin(a)) * rng.randf_range(6.5, 14.0)
 		p.rotation.y = rng.randf() * TAU
 		add_child(p)
 
