@@ -168,8 +168,10 @@ func update_status(size_cm: float, goal_cm: float, start_cm: float, time_left: f
 func add_feed(text: String, color: Color = Color(1, 0.95, 0.6)) -> void:
 	var l := _label(_feed, text, 28)
 	l.modulate = color
-	if _feed.get_child_count() > 6:
-		_feed.get_child(0).queue_free()
+	while _feed.get_child_count() > 6:
+		var oldest := _feed.get_child(0)
+		_feed.remove_child(oldest)
+		oldest.queue_free()
 	var tw := l.create_tween()
 	tw.tween_interval(1.6)
 	tw.tween_property(l, "modulate:a", 0.0, 0.6)

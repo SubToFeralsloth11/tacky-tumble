@@ -303,17 +303,22 @@ func ui_theme() -> Theme:
 	t.set_color("font_color", "Label", Color(1, 1, 1))
 	t.set_color("font_outline_color", "Label", Color(0.12, 0.06, 0.2))
 	t.set_constant("outline_size", "Label", 8)
-	t.set_color("font_color", "CheckButton", Color(1, 1, 1))
-	t.set_color("font_hover_color", "CheckButton", Color(1, 0.87, 0.35))
-	t.set_color("font_focus_color", "CheckButton", Color(1, 0.87, 0.35))
+	var check_bg := _box(Color(1, 1, 1, 0.06), 12)
+	var check_hover := _box(Color(1, 1, 1, 0.16), 12)
+	for style in [["normal", check_bg], ["pressed", check_bg], ["hover", check_hover], ["hover_pressed", check_hover], ["focus", check_hover]]:
+		t.set_stylebox(style[0], "CheckButton", style[1])
+	for c in ["font_color", "font_pressed_color"]:
+		t.set_color(c, "CheckButton", Color(1, 1, 1))
+	for c in ["font_hover_color", "font_focus_color", "font_hover_pressed_color"]:
+		t.set_color(c, "CheckButton", Color(1, 0.87, 0.35))
 
 	var bar_bg := _box(Color(0, 0, 0, 0.45), 10, 0)
 	var bar_fill := _box(Color(1.0, 0.49, 0.71), 10, 0)
 	t.set_stylebox("background", "ProgressBar", bar_bg)
 	t.set_stylebox("fill", "ProgressBar", bar_fill)
-	t.set_stylebox("slider", "HSlider", _box(Color(1, 1, 1, 0.3), 6, 0))
-	t.set_stylebox("grabber_area", "HSlider", _box(Color(1.0, 0.49, 0.71), 6, 0))
-	t.set_stylebox("grabber_area_highlight", "HSlider", _box(Color(1.0, 0.87, 0.35), 6, 0))
+	t.set_stylebox("slider", "HSlider", _box(Color(1, 1, 1, 0.3), 6, 8))
+	t.set_stylebox("grabber_area", "HSlider", _box(Color(1.0, 0.49, 0.71), 6, 8))
+	t.set_stylebox("grabber_area_highlight", "HSlider", _box(Color(1.0, 0.87, 0.35), 6, 8))
 	_theme = t
 	return t
 

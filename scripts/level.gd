@@ -80,7 +80,7 @@ func _process(delta: float) -> void:
 		_time_left -= delta
 		_elapsed += delta
 		if Game.autotest and int(_elapsed / 20.0) != int((_elapsed - delta) / 20.0):
-			print("AUTOTEST t=%.0f size_cm=%.1f pos=%s pickable=%d/%d" % [_elapsed, _size_cm(), ball.global_position, _next_pickable, _sorted.size()])
+			print("AUTOTEST t=%.0f size_cm=%.1f fps=%d pickable=%d/%d" % [_elapsed, _size_cm(), Engine.get_frames_per_second(), _next_pickable, _sorted.size()])
 		if _size_cm() >= float(def.goal_d):
 			_finish(true)
 		elif _time_left <= 0.0:
@@ -498,8 +498,8 @@ func _build_camera() -> void:
 	add_child(_cam_pivot)
 	_spring = SpringArm3D.new()
 	_spring.collision_mask = 1
-	_spring.rotation_degrees.x = -24.0
-	_spring.spring_length = ball.radius * 7.0
+	_spring.rotation_degrees.x = -32.0
+	_spring.spring_length = ball.radius * 6.5
 	_cam_pivot.add_child(_spring)
 	_camera = Camera3D.new()
 	_camera.fov = 68.0
@@ -518,7 +518,7 @@ func _update_camera(delta: float) -> void:
 	_cam_pivot.position = _cam_pivot.position.lerp(target, 1.0 - exp(-12.0 * delta))
 	_cam_pivot.rotation.y = _cam_yaw
 	ball.cam_yaw = _cam_yaw
-	_spring.spring_length = lerpf(_spring.spring_length, r * 7.0 + 3.0 * unit * 10.0, 1.0 - exp(-3.0 * delta))
+	_spring.spring_length = lerpf(_spring.spring_length, r * 6.5, 1.0 - exp(-3.0 * delta))
 	_spring.margin = r * 0.3
 	_camera.near = maxf(r * 0.04, 0.01)
 	_camera.far = half * 8.0

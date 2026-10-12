@@ -132,8 +132,7 @@ func _build_ui() -> void:
 		_menu_button(main, "Quit", func() -> void: get_tree().quit())
 
 	var settings := SettingsPanel.new()
-	settings.set_anchors_and_offsets_preset(Control.PRESET_CENTER_LEFT)
-	settings.position = Vector2(80, 180)
+	settings.position = Vector2(90, 90)
 	settings.closed.connect(func() -> void: _show("main"))
 	_ui.add_child(settings)
 	_panels.settings = settings
